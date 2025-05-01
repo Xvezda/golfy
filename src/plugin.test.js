@@ -52,3 +52,16 @@ test('while true to for loop', async () => {
     "for(;;);"
   `);
 });
+
+test('toString to template literal', async () => {
+  const code = `console.log(foo.toString());`;
+
+  const result = await babel.transformAsync(code, {
+    plugins: ['./src/plugin'],
+    minified: true,
+  });
+
+  expect(result.code).toMatchInlineSnapshot(`
+    "console.log(\`\${foo}\`);"
+  `);
+});

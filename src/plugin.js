@@ -20,26 +20,43 @@ export default function golfyPlugin({ types: t }) {
         // Replace read stdio with numeric fds
         if (
           path.node.callee.type === "MemberExpression" &&
-          path.node.callee.property.type === "Identifier" &&
-          (path.node.callee.property.name === "readFileSync" ||
-            path.node.callee.property.name === "readFile")
+          path.node.callee.property.type === "Identifier"
         ) {
-          if (path.node.arguments[0].type === "StringLiteral") {
-            switch (path.node.arguments[0].value) {
-              case '/dev/stdin':
-                path.node.arguments[0] = t.numericLiteral(0);
-                break;
-              case '/dev/stdout':
-                path.node.arguments[0] = t.numericLiteral(1);
-                break;
-              case '/dev/stderr':
-                path.node.arguments[0] = t.numericLiteral(2);
-                break;
-              default:
-                break;
+          if (path.node.callee.property.name === "readFileSync" ||
+              path.node.callee.property.name === "readFile"
+          ) {
+            if (path.node.arguments[0].type === "StringLiteral") {
+              switch (path.node.arguments[0].value) {
+                case '/dev/stdin':
+                  path.node.arguments[0] = t.numericLiteral(0);
+                  break;
+                case '/dev/stdout':
+                  path.node.arguments[0] = t.numericLiteral(1);
+                  break;
+                case '/dev/stderr':
+                  path.node.arguments[0] = t.numericLiteral(2);
+                  break;
+                default:
+                  break;
+              }
+              path.skip();
+              return;
             }
-            path.skip();
-            return;
+          }
+
+          if (path.node.callee.property.name === "toString") {
+            if (path.node.arguments.length === 0) {
+              path.replaceWith(
+                t.templateLiteral(
+                  [
+                    t.templateElement({ raw: '', cooked: '' }, true),
+                    t.templateElement({ raw: '', cooked: '' }, true)
+                  ],
+                  [t.cloneNode(path.node.callee.object)]
+                )
+              );
+              path.skip();
+            }
           }
         }
 

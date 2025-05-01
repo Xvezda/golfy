@@ -1,10 +1,9 @@
 import * as babel from "@babel/core";
 
 const code = `
-    const fs = require('fs');
-    var input = fs.readFileSync('/dev/stdin');
-    input += 'a';
-    input += 'b';
+const fs = require('fs');
+const input = fs.readFileSync('/dev/stdin');
+console.log(input);
 `;
 
 const result = await babel.transformAsync(code, {
