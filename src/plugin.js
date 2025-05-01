@@ -1,30 +1,5 @@
 // @ts-check
-
-// a, b, c ..., aa, bb, cc, ..., Aa, Ab, Ac, ..., aA, aB, aC, ..., zA, zB, zC, ..., a1, b1, c1, ...
-function *generateShortUniqueName() {
-  const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let index = 0;
-  let length = 1;
-
-  while (true) {
-    let name = '';
-    let tempIndex = index;
-
-    for (let i = 0; i < length; i++) {
-      name += alphabet[tempIndex % alphabet.length];
-      tempIndex = Math.floor(tempIndex / alphabet.length);
-    }
-
-    yield name;
-
-    index++;
-
-    if (index === Math.pow(alphabet.length, length)) {
-      index = 0;
-      length++;
-    }
-  }
-}
+import { generateShortUniqueName } from "./utils.js";
 
 /**
  * @param {import('@babel/core')} babel
@@ -46,7 +21,8 @@ export default function golfyPlugin({ types: t }) {
         if (
           path.node.callee.type === "MemberExpression" &&
           path.node.callee.property.type === "Identifier" &&
-          (path.node.callee.property.name === "readFileSync" || path.node.callee.property.name === "readFile")
+          (path.node.callee.property.name === "readFileSync" ||
+            path.node.callee.property.name === "readFile")
         ) {
           if (path.node.arguments[0].type === "StringLiteral") {
             switch (path.node.arguments[0].value) {
@@ -72,7 +48,11 @@ export default function golfyPlugin({ types: t }) {
           const declarator = binding.path.find((p) => p.isVariableDeclarator());
           const count = binding.references;
           if (count === 1) {
-            if (declarator && declarator.node.type === "VariableDeclarator" && declarator.node.init) {
+            if (
+              declarator &&
+              declarator.node.type === "VariableDeclarator" &&
+              declarator.node.init
+            ) {
               binding.referencePaths[0].replaceWith(declarator.node.init);
               declarator.remove();
               path.skip();
@@ -166,6 +146,12 @@ export default function golfyPlugin({ types: t }) {
                 break;
             }
           }
+        }
+      },
+      WhileStatement(path) {
+        if (path.node.test.type === "BooleanLiteral" && path.node.test.value === true) {
+          path.replaceWith(t.forStatement(null, null, null, path.node.body));
+          path.skip();
         }
       },
     },

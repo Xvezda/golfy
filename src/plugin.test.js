@@ -37,3 +37,18 @@ describe('inlining', () => {
     `);
   });
 });
+
+test('while true to for loop', async () => {
+  const code = `
+    while (true);
+    `;
+
+  const result = await babel.transformAsync(code, {
+    plugins: ['./src/plugin'],
+    minified: true,
+  });
+
+  expect(result.code).toMatchInlineSnapshot(`
+    "for(;;);"
+  `);
+});
