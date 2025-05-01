@@ -60,14 +60,17 @@ export default function golfyPlugin({ types: t }) {
             }
           }
 
-          if (path.node.callee.property.name === "join") {
+          if (
+            path.node.callee.property.name === "join" ||
+            path.node.callee.property.name === "split"
+          ) {
             if (path.node.arguments.length === 1 && 
                 path.node.arguments[0].type === "StringLiteral") {
               path.replaceWith(
                 t.taggedTemplateExpression(
                   t.memberExpression(
                     path.node.callee.object,
-                    t.identifier("join")
+                    t.identifier(path.node.callee.property.name)
                   ),
                   t.templateLiteral(
                     [

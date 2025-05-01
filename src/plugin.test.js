@@ -82,17 +82,34 @@ test('boolean literal with numbers', async () => {
   `);
 });
 
-test('use template literal for join', async () => {
-  const code = `
-    console.log([1, 2, 3].join(':'));
-  `;
+describe('tagged template tricks', () => {
+  test('join', async () => {
+    const code = `
+      console.log([1, 2, 3].join(':'));
+    `;
 
-  const result = await babel.transformAsync(code, {
-    plugins: ['./src/plugin'],
-    minified: true,
+    const result = await babel.transformAsync(code, {
+      plugins: ['./src/plugin'],
+      minified: true,
+    });
+
+    expect(result.code).toMatchInlineSnapshot(`
+      "console.log([1,2,3].join\`:\`);"
+    `);
   });
 
-  expect(result.code).toMatchInlineSnapshot(`
-    "console.log([1,2,3].join\`:\`);"
-  `);
+  test('split', async () => {
+    const code = `
+      console.log('1:2:3'.split(':'));
+    `;
+
+    const result = await babel.transformAsync(code, {
+      plugins: ['./src/plugin'],
+      minified: true,
+    });
+
+    expect(result.code).toMatchInlineSnapshot(`
+      "console.log(\"1:2:3\".split\`:\`);"
+    `);
+  });
 });
