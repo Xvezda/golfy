@@ -1,10 +1,13 @@
 import * as babel from "@babel/core";
+import parser from "@babel/parser";
+import { inspect } from 'util';
 
 const code = `
-const fs = require('fs');
-const input = fs.readFileSync('/dev/stdin');
-console.log(input);
+console.log(foo.toString());
 `;
+
+const ast = parser.parse(code);
+console.log(inspect(ast, { depth: null, colors: true }));
 
 const result = await babel.transformAsync(code, {
   plugins: ['./src/plugin'],

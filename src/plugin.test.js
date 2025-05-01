@@ -65,3 +65,34 @@ test('toString to template literal', async () => {
     "console.log(\`\${foo}\`);"
   `);
 });
+
+test('boolean literal with numbers', async () => {
+  const code = `
+    console.log(true);
+    console.log(false);
+  `;
+
+  const result = await babel.transformAsync(code, {
+    plugins: ['./src/plugin'],
+    minified: true,
+  });
+
+  expect(result.code).toMatchInlineSnapshot(`
+    "console.log(!0);console.log(!1);"
+  `);
+});
+
+test('use template literal for join', async () => {
+  const code = `
+    console.log([1, 2, 3].join(':'));
+  `;
+
+  const result = await babel.transformAsync(code, {
+    plugins: ['./src/plugin'],
+    minified: true,
+  });
+
+  expect(result.code).toMatchInlineSnapshot(`
+    "console.log([1,2,3].join\`:\`);"
+  `);
+});

@@ -49,13 +49,39 @@ export default function golfyPlugin({ types: t }) {
               path.replaceWith(
                 t.templateLiteral(
                   [
-                    t.templateElement({ raw: '', cooked: '' }, true),
-                    t.templateElement({ raw: '', cooked: '' }, true)
+                    t.templateElement({ raw: '', cooked: '' }),
+                    t.templateElement({ raw: '', cooked: '' })
                   ],
                   [t.cloneNode(path.node.callee.object)]
                 )
               );
               path.skip();
+              return;
+            }
+          }
+
+          if (path.node.callee.property.name === "join") {
+            if (path.node.arguments.length === 1 && 
+                path.node.arguments[0].type === "StringLiteral") {
+              path.replaceWith(
+                t.taggedTemplateExpression(
+                  t.memberExpression(
+                    path.node.callee.object,
+                    t.identifier("join")
+                  ),
+                  t.templateLiteral(
+                    [
+                      t.templateElement({
+                        raw: path.node.arguments[0].value,
+                        cooked: path.node.arguments[0].value
+                      })
+                    ],
+                    []
+                  )
+                )
+              );
+              path.skip();
+              return;
             }
           }
         }
@@ -169,6 +195,19 @@ export default function golfyPlugin({ types: t }) {
         if (path.node.test.type === "BooleanLiteral" && path.node.test.value === true) {
           path.replaceWith(t.forStatement(null, null, null, path.node.body));
           path.skip();
+        }
+      },
+      BooleanLiteral: {
+        exit(path) {
+          if (path.node.value === true) {
+            path.replaceWithSourceString('!0');
+            path.skip();
+          }
+
+          if (path.node.value === false) {
+            path.replaceWithSourceString('!1');
+            path.skip();
+          }
         }
       },
     },
