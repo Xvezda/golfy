@@ -66,22 +66,6 @@ test('toString to template literal', async () => {
   `);
 });
 
-test('boolean literal with numbers', async () => {
-  const code = `
-    console.log(true);
-    console.log(false);
-  `;
-
-  const result = await babel.transformAsync(code, {
-    plugins: ['./src/plugin'],
-    minified: true,
-  });
-
-  expect(result.code).toMatchInlineSnapshot(`
-    "console.log(!0);console.log(!1);"
-  `);
-});
-
 describe('tagged template tricks', () => {
   test('join', async () => {
     const code = `

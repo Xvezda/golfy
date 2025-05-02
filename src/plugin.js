@@ -139,57 +139,66 @@ export default function golfyPlugin({ types: t }) {
         if (path.node.id.type === "Identifier") {
           const binding = path.scope.getBinding(path.node.id.name);
           if (binding) {
-            const count = binding.references +
-              (path.parent.type === "VariableDeclaration" && path.parent.kind === 'const'
-                ? 0
-                : binding.constantViolations.length);
+            // if (binding.references + binding.constantViolations.length === 0) {
+            //   path.remove();
+            //   path.skip();
+            //   return;
+            // }
 
-            switch (count) {
-              case 0:
-                path.remove();
-                path.skip();
-                return;
-              case 1: {
-                // inlining
-                const parent = binding.referencePaths[0].parent;
-                if (!path.node.init) return;
-                switch (parent.type) {
-                  case "MemberExpression":
-                    parent.object = t.cloneNode(path.node.init);
+            if (path.parent.type === "VariableDeclaration") {
+              if (
+                path.node.init &&
+                path.parent.kind === 'const' &&
+                binding.references === 1
+              ) {
+                switch (binding.referencePaths[0].parent.type) {
+                  case 'MemberExpression':
+                    binding.referencePaths[0].parent.object = path.node.init;
                     path.remove();
                     path.skip();
                     return;
-                  default:
-                    break;
                 }
               }
-              default:
-                if (Object.keys(path.scope.getAllBindings()).length > 0) {
-                  // Replace with short unique names
-                  let newName;
-                  do {
-                    newName = shortUniqueNameGenerator.next().value;
-                    if (newName === undefined) {
-                      throw new Error("No more unique names available");
-                    }
-                  } while (path.scope.hasBinding(newName));
 
-                  path.scope.rename(path.node.id.name, newName);
-                }
-                // Replace declaration with just assignments
-                // i.e. const a = 1; => a = 1;
-                if (count > 1 && path.node.init) {
-                  path.parentPath.replaceWith(
-                    t.expressionStatement(
-                      t.assignmentExpression(
-                        '=',
-                        path.node.id,
-                        path.node.init
-                      )
-                    )
+              if (
+                path.parent.kind !== 'const' &&
+                path.node.init === null &&
+                binding.constantViolations.length === 1 &&
+                binding.constantViolations[0].node.type === "AssignmentExpression" &&
+                binding.constantViolations[0].node.operator === "="
+              ) {
+                if (binding.references === 1) {
+                  binding.referencePaths[0].replaceWith(
+                    binding.constantViolations[0].node.right
                   );
+                  binding.constantViolations[0].remove();
+                  path.skip();
+                  return;
                 }
-                break;
+              }
+            }
+
+            if (Object.keys(path.scope.bindings).length > 0) {
+              // Replace with short unique names
+              let newName;
+              do {
+                newName = shortUniqueNameGenerator.next().value;
+                if (newName === undefined) {
+                  throw new Error("No more unique names available");
+                }
+              } while (path.scope.hasBinding(newName));
+
+              path.scope.rename(path.node.id.name, newName);
+            }
+
+            if (path.node.init && binding.references + binding.constantViolations.length > 1) {
+              path.parentPath.replaceWith(
+                t.assignmentExpression(
+                  '=',
+                  t.cloneNode(path.node.id),
+                  t.cloneNode(path.node.init)
+                )
+              );
             }
           }
         }
@@ -198,19 +207,6 @@ export default function golfyPlugin({ types: t }) {
         if (path.node.test.type === "BooleanLiteral" && path.node.test.value === true) {
           path.replaceWith(t.forStatement(null, null, null, path.node.body));
           path.skip();
-        }
-      },
-      BooleanLiteral: {
-        exit(path) {
-          if (path.node.value === true) {
-            path.replaceWithSourceString('!0');
-            path.skip();
-          }
-
-          if (path.node.value === false) {
-            path.replaceWithSourceString('!1');
-            path.skip();
-          }
         }
       },
     },
