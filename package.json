@@ -1,18 +1,16 @@
 {
   "name": "golfy",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "",
   "main": "index.js",
-  "bin": {
-    "golfy": "./bin/golfy.js"
-  },
+  "bin": "./bin/cli.js",
   "scripts": {
     "test": "vitest"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Xvezda <xvezda@naver.com>",
+  "license": "MIT",
   "dependencies": {
     "@babel/core": "^7.27.1",
     "@babel/generator": "^7.27.1",
