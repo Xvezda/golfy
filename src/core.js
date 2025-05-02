@@ -6,7 +6,7 @@ export async function transform(code, options = {}) {
     useTerser: true,
   });
 
-  const minified = await aggressiveMinify(code);
+  const minified = await terserMinify(code);
 
   let result = await babel.transformAsync(minified.code, {
     plugins: ['./src/plugin'],
@@ -14,13 +14,13 @@ export async function transform(code, options = {}) {
   });
 
   if (options.useTerser) {
-    result = await aggressiveMinify(result.code);
+    result = await terserMinify(result.code);
   }
 
   return result;
 }
 
-export async function aggressiveMinify(code) {
+export async function terserMinify(code) {
   return await minify(code, {
     compress: {
       arrows: true,

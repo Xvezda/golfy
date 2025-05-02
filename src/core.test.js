@@ -1,5 +1,5 @@
 import { vi, test, expect } from 'vitest';
-import { transform, aggressiveMinify } from './core.js';
+import { transform, terserMinify } from './core.js';
 
 test('benchmark #1', async () => {
   const code = `
@@ -11,7 +11,7 @@ test('benchmark #1', async () => {
   const result = await transform(code);
   expect(() => new Function(result.code)).not.toThrow(SyntaxError);
 
-  const terserResult = await aggressiveMinify(code);
+  const terserResult = await terserMinify(code);
 
   showResultInTable(result, terserResult);
 
@@ -24,7 +24,7 @@ test('benchmark #2', async () => {
   const result = await transform(code);
   expect(() => new Function(result.code)).not.toThrow(SyntaxError);
 
-  const terserResult = await aggressiveMinify(code);
+  const terserResult = await terserMinify(code);
 
   showResultInTable(result, terserResult);
 
@@ -46,7 +46,7 @@ test('benchmark #3', async () => {
   const result = await transform(code);
   expect(() => new Function(result.code)).not.toThrow(SyntaxError);
 
-  const terserResult = await aggressiveMinify(code);
+  const terserResult = await terserMinify(code);
 
   showResultInTable(result, terserResult);
 
