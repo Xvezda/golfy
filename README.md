@@ -18,10 +18,10 @@ The things this project does not aim for:
 - Maintaining internal implementation consistency with the input code (as long as the same input produces the same output, it's fine)
 - Execution performance (code length takes priority)
 
+## Usage
+
 > [!WARNING]  
 > WIP project and is highly experimental and unstable.
-
-## Usage
 
 ```sh
 npm install -g golfy
