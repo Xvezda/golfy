@@ -8,6 +8,19 @@
 
 golfy is a program that converts the input code into code optimized for code golf.
 
+## Example
+The following code
+```javascript
+const fs = require('fs');
+const input = fs.readFileSync('/dev/stdin');
+console.log(input);
+```
+can be transformed as follows
+```javascript
+console.log(require("fs").readFileSync(0))
+```
+
+## Goals
 The goals of this project are as follows:
 - Shorter code over stability
 - Optimization of the output over processing time
