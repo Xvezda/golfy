@@ -9,10 +9,7 @@ describe('inlining', () => {
     console.log(input);
     `;
 
-    const result = await babel.transformAsync(code, {
-      plugins: ['./src/plugin'],
-      minified: true,
-    });
+    const result = await transform(code);
 
     expect(result.code).toMatchInlineSnapshot(`
       "console.log(require("fs").readFileSync(0));"
@@ -27,10 +24,7 @@ describe('inlining', () => {
     input += 'b';
     `;
 
-    const result = await babel.transformAsync(code, {
-      plugins: ['./src/plugin'],
-      minified: true,
-    });
+    const result = await transform(code);
 
     expect(result.code).toMatchInlineSnapshot(`
       "a=require("fs").readFileSync(0);a+=\"a\";a+=\"b\";"
@@ -43,10 +37,7 @@ test('while true to for loop', async () => {
     while (true);
     `;
 
-  const result = await babel.transformAsync(code, {
-    plugins: ['./src/plugin'],
-    minified: true,
-  });
+  const result = await transform(code);
 
   expect(result.code).toMatchInlineSnapshot(`
     "for(;;);"
@@ -56,10 +47,7 @@ test('while true to for loop', async () => {
 test('toString to template literal', async () => {
   const code = `console.log(foo.toString());`;
 
-  const result = await babel.transformAsync(code, {
-    plugins: ['./src/plugin'],
-    minified: true,
-  });
+  const result = await transform(code);
 
   expect(result.code).toMatchInlineSnapshot(`
     "console.log(\`\${foo}\`);"
@@ -72,10 +60,7 @@ describe('tagged template tricks', () => {
       console.log([1, 2, 3].join(':'));
     `;
 
-    const result = await babel.transformAsync(code, {
-      plugins: ['./src/plugin'],
-      minified: true,
-    });
+    const result = await transform(code);
 
     expect(result.code).toMatchInlineSnapshot(`
       "console.log([1,2,3].join\`:\`);"
@@ -87,10 +72,7 @@ describe('tagged template tricks', () => {
       console.log('1:2:3'.split(':'));
     `;
 
-    const result = await babel.transformAsync(code, {
-      plugins: ['./src/plugin'],
-      minified: true,
-    });
+    const result = await transform(code);
 
     expect(result.code).toMatchInlineSnapshot(`
       "console.log(\"1:2:3\".split\`:\`);"
@@ -104,10 +86,7 @@ describe('newline character escape in string as-is', () => {
       console.log('\\n');
     `;
 
-    const result = await babel.transformAsync(code, {
-      plugins: ['./src/plugin'],
-      minified: true,
-    });
+    const result = await transform(code);
 
     expect(result.code).toMatchInlineSnapshot(`
       "console.log(\`\n\`);"
@@ -119,13 +98,17 @@ describe('newline character escape in string as-is', () => {
       console.log(\`\\n\`);
     `;
 
-    const result = await babel.transformAsync(code, {
-      plugins: ['./src/plugin'],
-      minified: true,
-    });
+    const result = await transform(code);
 
     expect(result.code).toMatchInlineSnapshot(`
       "console.log(\`\n\`);"
     `);
   });
 });
+
+async function transform(code) {
+  return await babel.transformAsync(code, {
+    plugins: ['./src/plugin'],
+    minified: true,
+  });
+}
