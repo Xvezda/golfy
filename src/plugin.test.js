@@ -97,3 +97,35 @@ describe('tagged template tricks', () => {
     `);
   });
 });
+
+describe('newline character escape in string as-is', () => {
+  test('string literal', async () => {
+    const code = `
+      console.log('\\n');
+    `;
+
+    const result = await babel.transformAsync(code, {
+      plugins: ['./src/plugin'],
+      minified: true,
+    });
+
+    expect(result.code).toMatchInlineSnapshot(`
+      "console.log(\`\n\`);"
+    `);
+  });
+
+  test('template literal', async () => {
+    const code = `
+      console.log(\`\\n\`);
+    `;
+
+    const result = await babel.transformAsync(code, {
+      plugins: ['./src/plugin'],
+      minified: true,
+    });
+
+    expect(result.code).toMatchInlineSnapshot(`
+      "console.log(\`\n\`);"
+    `);
+  });
+});
