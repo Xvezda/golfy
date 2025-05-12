@@ -6,9 +6,11 @@ export async function transform(code, options = {}) {
     useTerser: true,
   });
 
-  const minified = await terserMinify(code);
+  let result;
 
-  let result = await babel.transformAsync(minified.code, {
+  // result = await terserMinify(code);
+
+  result = await babel.transformAsync(code, {
     plugins: ['./src/plugin'],
     minified: true,
   });

@@ -10,6 +10,7 @@ export default function golfyPlugin({ types: t }) {
   let funcRefCounter;
 
   return {
+    name: 'golfy-plugin',
     pre: (_state) => {
       // Initialize the short unique name generator
       shortUniqueNameGenerator = generateShortUniqueName();

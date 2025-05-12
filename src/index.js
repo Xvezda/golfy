@@ -1,5 +1,5 @@
-import parser from "@babel/parser";
-import { inspect } from 'util';
+// import parser from "@babel/parser";
+// import { inspect } from 'util';
 import { transform } from './core.js';
 
 const code = `
@@ -43,7 +43,7 @@ var x = 10 + 0;
 var y = !!true;
 `;
 
-const ast = parser.parse(code);
+// const ast = parser.parse(code, { sourceType: 'module' });
 // console.log(inspect(ast, { depth: null, colors: true }));
 
 const result = await transform(code);
