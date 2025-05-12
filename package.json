@@ -2,13 +2,20 @@
   "name": "golfy",
   "version": "0.1.0",
   "type": "module",
-  "description": "",
-  "main": "index.js",
+  "description": "An aggressive JavaScript minifier for code golf",
+  "main": "./src/index.js",
   "bin": "./bin/cli.js",
   "scripts": {
     "test": "vitest"
   },
-  "keywords": [],
+  "keywords": [
+    "uglify",
+    "code-golf",
+    "compressor",
+    "minifier",
+    "codegolfing",
+    "mangler"
+  ],
   "author": "Xvezda <xvezda@naver.com>",
   "license": "MIT",
   "dependencies": {
