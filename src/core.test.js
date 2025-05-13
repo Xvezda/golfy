@@ -13,7 +13,7 @@ test('benchmark #1', async () => {
 
   const terserResult = await terserMinify(code);
 
-  showResultInTable(result, terserResult);
+  showResultInTable(code, terserResult.code, result.code);
 
   expect(result.code.length).toBeLessThan(terserResult.code.length);
 });
@@ -26,7 +26,7 @@ test('benchmark #2', async () => {
 
   const terserResult = await terserMinify(code);
 
-  showResultInTable(result, terserResult);
+  showResultInTable(code, terserResult.code, result.code);
 
   expect(result.code.length).toBeLessThan(terserResult.code.length);
 
@@ -48,7 +48,7 @@ test('benchmark #3', async () => {
 
   const terserResult = await terserMinify(code);
 
-  showResultInTable(result, terserResult);
+  showResultInTable(code, terserResult.code, result.code);
 
   expect(result.code.length).toBeLessThan(terserResult.code.length);
 
@@ -62,20 +62,36 @@ test('benchmark #3', async () => {
   expect(origFn.mock.calls).toEqual(golfyFn.mock.calls);
 });
 
-function showResultInTable(golfyResult, compareResult) {
+/**
+ * @param {string} original
+ * @param {string} minified
+ * @param {string} golfed
+ */
+function showResultInTable(original, minified, golfed) {
+  const originalLength = original.length;
+  const golfedLength = golfed.length;
+  const minifiedLength = minified.length;
+
   console.table({
-    golfy: {
-      code: golfyResult.code,
-      length: golfyResult.code.length,
+    original: {
+      code: original,
+      length: originalLength,
     },
-    compare: {
-      code: compareResult.code,
-      length: compareResult.code.length,
+    minified: {
+      code: minified,
+      length: minifiedLength,
+    },
+    golfed: {
+      code: golfed,
+      length: golfedLength,
     },
   });
 
-  const golfyLength = golfyResult.code.length;
-  const compareLength = compareResult.code.length;
-  const golfyEfficiency = ((compareLength - golfyLength) / compareLength) * 100;
-  console.log(`~${golfyEfficiency.toFixed(2)}% shorter when using with golfy.`);
+  const minifiedEfficiency = ((originalLength - minifiedLength) / originalLength) * 100;
+  const originalGolfyEfficiency = ((originalLength - golfedLength) / originalLength) * 100;
+  const minifiedGolfyEfficiency = ((minifiedLength - golfedLength) / minifiedLength) * 100;
+
+  console.log(`pure minified: ~${minifiedEfficiency.toFixed(2)}% (-${originalLength - minifiedLength}B)`);
+  console.log(`minified vs golfy: ~${minifiedGolfyEfficiency.toFixed(2)}% (-${minifiedLength - golfedLength}B)`);
+  console.log(`original vs golfy: ~${originalGolfyEfficiency.toFixed(2)}% (-${originalLength - golfedLength}B)`);
 }
