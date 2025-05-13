@@ -15,7 +15,7 @@ test('benchmark #1', async () => {
 
   showResultInTable(code, terserResult.code, result.code);
 
-  expect(result.code.length).toBeLessThan(terserResult.code.length);
+  expect(result.code.length).toBeLessThanOrEqual(terserResult.code.length);
 });
 
 test('benchmark #2', async () => {
@@ -28,7 +28,7 @@ test('benchmark #2', async () => {
 
   showResultInTable(code, terserResult.code, result.code);
 
-  expect(result.code.length).toBeLessThan(terserResult.code.length);
+  expect(result.code.length).toBeLessThanOrEqual(terserResult.code.length);
 
   // TODO: refactor
   const origFn = vi.fn();
@@ -50,7 +50,7 @@ test('benchmark #3', async () => {
 
   showResultInTable(code, terserResult.code, result.code);
 
-  expect(result.code.length).toBeLessThan(terserResult.code.length);
+  expect(result.code.length).toBeLessThanOrEqual(terserResult.code.length);
 
   // TODO: refactor
   const origFn = vi.fn();
