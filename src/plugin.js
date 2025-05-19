@@ -119,38 +119,11 @@ export default function golfyPlugin({ types: t }) {
         } else {
           funcRefCounter.set(functionName, 1);
         }
-        // console.log(`Function ${functionName} has been referenced ${funcRefCounter.get(functionName)} times`);
-        /*
-        if (funcRefCounter.get(functionName) > 1) {
-          const newName = shortUniqueNameGenerator.next().value;
-          if (newName === undefined) {
-            throw new Error("No more unique names available");
-          }
-          if (functionName.includes('.')) {  // MemberExpression
-            const [objectName, methodName] = functionName.split('.');
-            const binding = path.scope.getBinding(methodName);
-            if (binding) {
-              binding.path.replaceWith(
-                t.memberExpression(
-                  t.identifier(newName),
-                  t.identifier(methodName)
-                )
-              );
-            }
-          }
-        }
-        */
       },
       VariableDeclarator(path) {
         if (path.node.id.type === "Identifier") {
           const binding = path.scope.getBinding(path.node.id.name);
           if (binding) {
-            // if (binding.references + binding.constantViolations.length === 0) {
-            //   path.remove();
-            //   path.skip();
-            //   return;
-            // }
-
             if (path.parent.type === "VariableDeclaration") {
               // Replace `const a = foo(); a.bar();` to `foo().bar();`
               if (
