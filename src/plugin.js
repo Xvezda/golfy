@@ -18,14 +18,16 @@ export default function golfyPlugin({ types: t }) {
     },
     visitor: {
       CallExpression(path) {
-        // Replace read stdio with numeric fds
+        // Find any method calls such as `foo.bar()`
         if (
           path.node.callee.type === "MemberExpression" &&
           path.node.callee.property.type === "Identifier"
         ) {
+          // `.readFileSync()` or `.readFile()`
           if (path.node.callee.property.name === "readFileSync" ||
               path.node.callee.property.name === "readFile"
           ) {
+            // Replace read stdio with numeric fds
             if (path.node.arguments[0].type === "StringLiteral") {
               switch (path.node.arguments[0].value) {
                 case '/dev/stdin':
@@ -45,6 +47,7 @@ export default function golfyPlugin({ types: t }) {
             }
           }
 
+          // Replace `foo.toString()` with ``${foo}``
           if (path.node.callee.property.name === "toString") {
             if (path.node.arguments.length === 0) {
               path.replaceWith(
@@ -61,6 +64,7 @@ export default function golfyPlugin({ types: t }) {
             }
           }
 
+          // Replace `.join(',')` or `.split(',')` with `.join`,`` and `.split`,``
           if (
             path.node.callee.property.name === "join" ||
             path.node.callee.property.name === "split"
@@ -90,7 +94,8 @@ export default function golfyPlugin({ types: t }) {
           }
         }
 
-        // inlining
+        // If there is `foo()` and `foo` is a variable which referenced only once,
+        // inline initialization part of `foo` and remove the variable
         Object.entries(path.scope.bindings).forEach(([_name, binding]) => {
           const declarator = binding.path.find((p) => p.isVariableDeclarator());
           const count = binding.references;
@@ -147,6 +152,7 @@ export default function golfyPlugin({ types: t }) {
             // }
 
             if (path.parent.type === "VariableDeclaration") {
+              // Replace `const a = foo(); a.bar();` to `foo().bar();`
               if (
                 path.node.init &&
                 path.parent.kind === 'const' &&
@@ -161,6 +167,7 @@ export default function golfyPlugin({ types: t }) {
                 }
               }
 
+              // Find lazy initializations with single assignment
               if (
                 path.parent.kind !== 'const' &&
                 path.node.init === null &&
@@ -168,11 +175,14 @@ export default function golfyPlugin({ types: t }) {
                 binding.constantViolations[0].node.type === "AssignmentExpression" &&
                 binding.constantViolations[0].node.operator === "="
               ) {
+                // If variable referenced only once,
+                // inline it, remove declaration and assignment.
                 if (binding.references === 1) {
                   binding.referencePaths[0].replaceWith(
                     binding.constantViolations[0].node.right
                   );
                   binding.constantViolations[0].remove();
+                  path.remove();
                   path.skip();
                   return;
                 }
@@ -192,6 +202,7 @@ export default function golfyPlugin({ types: t }) {
               path.scope.rename(path.node.id.name, newName);
             }
 
+            // Replace variable declaration with assignment which did not inlined
             if (path.node.init && binding.references + binding.constantViolations.length > 1) {
               path.parentPath.replaceWith(
                 t.assignmentExpression(
@@ -205,6 +216,7 @@ export default function golfyPlugin({ types: t }) {
         }
       },
       WhileStatement(path) {
+        // Find `while (true)` and replace it with `for (;;)`
         if (path.node.test.type === "BooleanLiteral" && path.node.test.value === true) {
           path.replaceWith(t.forStatement(null, null, null, path.node.body));
           path.skip();

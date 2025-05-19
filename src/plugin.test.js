@@ -19,6 +19,25 @@ describe('inlining', () => {
     `);
   });
 
+  test('merge lazy initializations', async () => {
+    const code = `
+    var fs;
+    fs = require('fs');
+    let input;
+    input = fs.readFileSync('/dev/stdin');
+    console.log(input);
+    `;
+
+    const result = await babel.transformAsync(code, {
+      plugins: ['./src/plugin'],
+      minified: true,
+    });
+
+    expect(result.code).toMatchInlineSnapshot(`
+      "console.log(require("fs").readFileSync(0));"
+    `);
+  });
+
   test('do not inline when referenced multiple times', async () => {
     const code = `
     const fs = require('fs');
