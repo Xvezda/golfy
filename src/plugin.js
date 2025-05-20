@@ -195,6 +195,38 @@ export default function golfyPlugin({ types: t }) {
           path.skip();
         }
       },
+      StringLiteral(path) {
+        if (
+          path.node.extra &&
+          (path.node.extra.raw === "'\\n'" || path.node.extra.raw === '"\\n"')
+        ) {
+          path.replaceWith(
+            t.templateLiteral(
+              [
+                t.templateElement({
+                  raw: '\n',
+                  cooked: '\n'
+                })
+              ],
+              []
+            )
+          );
+          path.skip();
+          return;
+        }
+      },
+      TemplateElement(path) {
+        if (path.node.value && path.node.value.raw === '\\n') {
+          path.replaceWith(
+            t.templateElement({
+              raw: '\n',
+              cooked: '\n'
+            })
+          );
+          path.skip();
+          return;
+        }
+      }
     },
   };
 };
